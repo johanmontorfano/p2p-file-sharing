@@ -4,11 +4,11 @@ import { render } from 'solid-js/web';
 import { v4 } from "uuid";
 import {Broadcasting} from './broadcasting';
 import "./index.css";
-import Peer, {LogLevel} from 'peerjs';
+import Peer from 'peerjs';
 import {Receiving} from './receiving';
 
 function App() {
-    const peer = new Peer(v4(), {debug: LogLevel.All});
+    const peer = new Peer(v4(), {debug: 3});
 
     return <div class="w-full flex justify-center">
         <div class="max-w-[800px] w-full p-4">
