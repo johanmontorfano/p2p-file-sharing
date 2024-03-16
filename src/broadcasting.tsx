@@ -5,13 +5,13 @@ import { P2PDataset } from "./types";
 
 /**
  * The size of a chunk of the broadcasted file.
- * */
+ */
 const FILE_CHUNK_SIZE = 32168;
 
 /**
  * This is the UI used to initiate and monitor files shared.
  * @param peer The Peer instance of the broadcaster.
- * */
+ */
 export function Broadcasting(props: { peer: Peer }) {
     const [broadcastingReady, setBroadcastingReady] = createSignal(false);
     const [peerConnected, setPeerConnected] = createSignal("");
