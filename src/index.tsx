@@ -1,6 +1,5 @@
 /* @refresh reload */
-import { Accordion, AccordionBody } from 'solid-bootstrap';
-import {createSignal} from 'solid-js';
+import { Accordion } from 'solid-bootstrap';
 import { render } from 'solid-js/web';
 import { v4 } from "uuid";
 import {Broadcasting} from './broadcasting';
