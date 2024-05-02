@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@akamfoad/qrcode':
+    specifier: ^0.3.2
+    version: 0.3.2
   peerjs:
     specifier: ^1.5.2
     version: 1.5.2
@@ -48,6 +51,18 @@ devDependencies:
     version: 2.10.2(solid-js@1.8.16)(vite@5.2.9)
 
 packages:
+
+  /@akamfoad/qr@0.4.0:
+    resolution: {integrity: sha512-kkuVMHLZIXdJbno48tcZIIFHwmc8QPbq0872sPxPMXQxpOBN007viBesAoME3es5yQg9KPXMPROYGe+piqeTTA==}
+    engines: {node: '>=16'}
+    dev: false
+
+  /@akamfoad/qrcode@0.3.2:
+    resolution: {integrity: sha512-UfJ4AiRJxW1c5paimpNJsn+8a6HwlwdsKuEOuTeQfOKaAK55c0ALzlarnMu22TB1JZEJ+7z+1hS4bziqZDUx7g==}
+    engines: {node: '>=18'}
+    dependencies:
+      '@akamfoad/qr': 0.4.0
+    dev: false
 
   /@alloc/quick-lru@5.2.0:
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
