@@ -61,4 +61,4 @@ function App() {
     </div>
 }   
 
-render(App, document.getElementById("root") as HTMLElement)
+render(App, document.getElementById("root") as HTMLElement);
