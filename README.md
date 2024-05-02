@@ -28,3 +28,4 @@ with a `1006` code.
 - [ ] Solve an issue on the broadcaster side, if the broadcasted file changes, the change is not registered and the previously broadcasted file is shared with the metadata of the new one
 - [ ] Implement integrity checks on the received file (SHA)
 - [ ] Make websockets work on Safari
+- [ ] Add a QR Code for easier connection
