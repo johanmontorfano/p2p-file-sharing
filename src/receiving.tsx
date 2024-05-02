@@ -78,7 +78,7 @@ export function Receiving(props: { peer: Peer }) {
                 <Button
                     disabled={broadcasterID() !== ""}
                     variant="primary"
-                    class="text-black hover:text-white"
+                    class="text-white"
                     type="submit"
                 >
                     Start receiving

@@ -4,9 +4,9 @@ import { Peer } from "peerjs";
 import { P2PDataset } from "./types";
 
 /**
- * The size of a chunk of the broadcasted file.
+ * The size of a chunk of the broadcasted file 64ko.
  */
-const FILE_CHUNK_SIZE = 32168;
+const FILE_CHUNK_SIZE = 65536;
 
 /**
  * This is the UI used to initiate and monitor files shared.
@@ -88,7 +88,7 @@ export function Broadcasting(props: { peer: Peer }) {
                 <br />
                 <Button
                     disabled={broadcastingReady()}
-                    class="text-black hover:text-white"
+                    class="text-white"
                     variant="primary"
                     type="submit"
                 >

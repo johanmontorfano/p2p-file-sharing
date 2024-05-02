@@ -14,7 +14,7 @@ function App() {
 
     peer.on("error", (err) => setError(err.message + " Try to refresh."));
 
-    return <div class="w-full flex justify-center">
+    return <div class="w-full h-dvh flex flex-col items-center justify-between">
         <div class="max-w-[800px] w-full p-4">
             <h1>P2P File Sharing</h1>
             <p>Identity: <strong>{peer.id}</strong></p>
@@ -58,7 +58,17 @@ function App() {
                 </Accordion.Item>
             </Accordion>
         </div>
+        <div class="bottom-0 flex items-center hover:cursor-pointer mb-3"
+            onClick={() => window.location.assign("https://johanmontorfano.com")}
+        >
+            <p class="mr-2">by</p>
+            <img alt="Author's logo"
+                src="https://johanmontorfano.com/logo.svg" 
+                width={30} 
+                height={30} 
+            />
+        </div>
     </div>
 }   
 
-render(App, document.getElementById("root") as HTMLElement)
+render(App, document.getElementById("root") as HTMLElement);

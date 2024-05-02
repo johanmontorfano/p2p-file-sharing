@@ -1,2 +1,4 @@
 node_modules
 dist
+.nvim/
+pnpm-lock.yaml
