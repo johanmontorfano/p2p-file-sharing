@@ -88,7 +88,7 @@ export function Broadcasting(props: { peer: Peer }) {
                 <br />
                 <Button
                     disabled={broadcastingReady()}
-                    class="text-black hover:text-white"
+                    class="text-white"
                     variant="primary"
                     type="submit"
                 >
