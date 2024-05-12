@@ -63,7 +63,7 @@ function App() {
         >
             <p class="mr-2">by</p>
             <img alt="Author's logo"
-                src="https://johanmontorfano.com/logo.svg" 
+                src="https://johanmontorfano.com/assets/logo.svg" 
                 width={30} 
                 height={30} 
             />
