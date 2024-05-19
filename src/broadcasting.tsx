@@ -34,7 +34,6 @@ export function Broadcasting(props: { peer: Peer }) {
                         const file = fileInput.files.item(0) as File;
                         setBroadcastingReady(true);
                         props.peer.on("connection", (conn) => {
-                            alert(conn.peer);
                             conn.on("open", () => {
                                 setPeerConnected(conn.peer);
                                 conn.send({
