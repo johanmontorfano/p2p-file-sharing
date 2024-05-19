@@ -4,10 +4,13 @@ import { Show, createEffect, createSignal } from "solid-js";
 import { P2PDataset } from "./types";
 
 export function Receiving(props: { peer: Peer }) {
+    const urlParams = new URLSearchParams(document.location.search);
     let fileParts: ArrayBuffer[] = [];
     let readBytes = 0;
 
-    const [broadcasterID, setBroadcasterID] = createSignal("");
+    const [broadcasterID, setBroadcasterID] = createSignal(
+        urlParams.has("id") ? urlParams.get("id") as string : ""
+    );
     const [broadcasterExists, setBroadcasterExists] = createSignal<
         null | boolean
     >(null);

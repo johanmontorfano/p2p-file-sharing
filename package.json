@@ -20,10 +20,10 @@
     "vite-plugin-solid": "^2.10.2"
   },
   "dependencies": {
-    "@akamfoad/qrcode": "^0.3.2",
     "peerjs": "^1.5.4",
     "solid-bootstrap": "^1.0.20",
     "solid-js": "^1.8.17",
+    "solid-qr-code": "^0.1.11",
     "uuid": "^9.0.1"
   }
 }
