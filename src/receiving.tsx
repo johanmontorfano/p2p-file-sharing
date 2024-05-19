@@ -4,10 +4,16 @@ import { Show, createEffect, createSignal } from "solid-js";
 import { P2PDataset } from "./types";
 
 export function Receiving(props: { peer: Peer }) {
+    const urlParams = new URLSearchParams(document.location.search);
     let fileParts: ArrayBuffer[] = [];
     let readBytes = 0;
 
-    const [broadcasterID, setBroadcasterID] = createSignal("");
+    const [broadcasterID, setBroadcasterID] = createSignal(
+        urlParams.has("id") ? urlParams.get("id") as string : ""
+    );
+    const [autoPopulatedID, setAutoPopulatedID] = createSignal(
+        urlParams.has("id")
+    );
     const [broadcasterExists, setBroadcasterExists] = createSignal<
         null | boolean
     >(null);
@@ -16,8 +22,9 @@ export function Receiving(props: { peer: Peer }) {
     const [fileSize, setFileSize] = createSignal(0);
     const [progress, setProgress] = createSignal(0);
 
-    createEffect(() => {
+    function checkPeer() {
         const conn = props.peer.connect(broadcasterID());
+        setAutoPopulatedID(false);
         conn.on("open", () => {
             setBroadcasterExists(true);
             fileParts = [];
@@ -51,7 +58,7 @@ export function Receiving(props: { peer: Peer }) {
                 conn.close();
             }
         });
-    });
+    }
 
     return (
         <div>
@@ -62,6 +69,7 @@ export function Receiving(props: { peer: Peer }) {
                         document.getElementById("broadcaster-id");
                     if (broadcasterInput) {
                         setBroadcasterID((broadcasterInput as any).value);
+                        checkPeer();
                     }
                 }}
             >
@@ -70,13 +78,14 @@ export function Receiving(props: { peer: Peer }) {
                     <Form.Control
                         type="text"
                         id="broadcaster-id"
-                        disabled={broadcasterID() !== ""}
+                        value={broadcasterID()}
+                        disabled={broadcasterID() !== "" || autoPopulatedID()}
                         required
                     />
                 </Form.Group>
                 <br />
                 <Button
-                    disabled={broadcasterID() !== ""}
+                    disabled={broadcasterID() !== "" && !autoPopulatedID()}
                     variant="primary"
                     class="text-white"
                     type="submit"
@@ -85,7 +94,7 @@ export function Receiving(props: { peer: Peer }) {
                 </Button>
             </Form>
             <br />
-            <Show when={broadcasterID() !== ""}>
+            <Show when={broadcasterID() !== "" && !autoPopulatedID()}>
                 <Show
                     when={broadcasterExists() !== null}
                     fallback={<p>Looking for {broadcasterID()}...</p>}

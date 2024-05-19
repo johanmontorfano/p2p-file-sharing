@@ -34,7 +34,6 @@ export function Broadcasting(props: { peer: Peer }) {
                         const file = fileInput.files.item(0) as File;
                         setBroadcastingReady(true);
                         props.peer.on("connection", (conn) => {
-                            alert(conn.peer);
                             conn.on("open", () => {
                                 setPeerConnected(conn.peer);
                                 conn.send({
@@ -60,7 +59,9 @@ export function Broadcasting(props: { peer: Peer }) {
                                             raw: await slice.arrayBuffer()
                                         });
                                         startByte += FILE_CHUNK_SIZE;
-                                        setProgress(startByte / file.size * 100);
+                                        setProgress(startByte / file.size > 1 ?
+                                            100 : startByte / file.size
+                                        );
                                     }
                                     conn.send({
                                         type: "finished",

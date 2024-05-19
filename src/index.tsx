@@ -3,21 +3,34 @@ import { Accordion, Card } from 'solid-bootstrap';
 import { render } from 'solid-js/web';
 import { v4 } from "uuid";
 import {Broadcasting} from './broadcasting';
-import "./index.css";
+import {QRCodeCanvas} from "solid-qr-code";
 import Peer from 'peerjs';
 import {Receiving} from './receiving';
 import {Show, createSignal} from 'solid-js';
+import "./index.css";
 
 function App() {
     const [error, setError] = createSignal("");
-    const peer = new Peer(v4());
+    const peer = new Peer(`jmp2p_${v4().slice(0, 8)}`);
+    const url = 
+        `${window.location.protocol}//${window.location.hostname}/?id=${peer.id}`
 
     peer.on("error", (err) => setError(err.message + " Try to refresh."));
 
     return <div class="w-full h-dvh flex flex-col items-center justify-between">
         <div class="max-w-[800px] w-full p-4">
-            <h1>P2P File Sharing</h1>
-            <p>Identity: <strong>{peer.id}</strong></p>
+            <div class="w-full flex justify-between items-center">
+                <div>
+                    <h1>P2P File Sharing</h1>
+                    <p>Identity: <strong>{peer.id}</strong></p>
+                </div>
+                <QRCodeCanvas
+                    value={url}
+                    level="high"
+                    width={url.length * 2}
+                    height={url.length * 2}
+                />
+            </div>
             <br />
             <Show when={error() !== ""}>
                 <Card bg="danger" text="white">
