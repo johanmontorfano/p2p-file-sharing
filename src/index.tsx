@@ -12,6 +12,8 @@ import "./index.css";
 function App() {
     const [error, setError] = createSignal("");
     const peer = new Peer(`jmp2p_${v4().slice(0, 8)}`);
+    const url = 
+        `${window.location.protocol}//${window.location.hostname}/?id=${peer.id}`
 
     peer.on("error", (err) => setError(err.message + " Try to refresh."));
 
@@ -23,14 +25,10 @@ function App() {
                     <p>Identity: <strong>{peer.id}</strong></p>
                 </div>
                 <QRCodeCanvas
-                    value={`${
-                        window.location.protocol
-                    }//${
-                        window.location.hostname
-                    }/?id=${peer.id}`}
+                    value={url}
                     level="high"
-                    width={92}
-                    height={92}
+                    width={url.length * 2}
+                    height={url.length * 2}
                 />
             </div>
             <br />
