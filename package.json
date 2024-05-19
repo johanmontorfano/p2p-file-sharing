@@ -21,9 +21,8 @@
   },
   "dependencies": {
     "@akamfoad/qrcode": "^0.3.2",
-    "peerjs": "^1.5.2",
-    "solid-bootstrap": "^1.0.19",
-    "solid-icons": "^1.1.0",
+    "peerjs": "^1.5.4",
+    "solid-bootstrap": "^1.0.20",
     "solid-js": "^1.8.17",
     "uuid": "^9.0.1"
   }
