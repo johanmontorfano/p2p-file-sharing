@@ -59,7 +59,9 @@ export function Broadcasting(props: { peer: Peer }) {
                                             raw: await slice.arrayBuffer()
                                         });
                                         startByte += FILE_CHUNK_SIZE;
-                                        setProgress(startByte / file.size * 100);
+                                        setProgress(startByte / file.size > 1 ?
+                                            100 : startByte / file.size
+                                        );
                                     }
                                     conn.send({
                                         type: "finished",
