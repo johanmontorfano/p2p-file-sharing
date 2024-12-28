@@ -3,7 +3,7 @@ import { Accordion, Card } from 'solid-bootstrap';
 import { render } from 'solid-js/web';
 import { v4 } from "uuid";
 import {Broadcasting} from './broadcasting';
-import {QRCodeCanvas} from "solid-qr-code";
+import {QRCodeSVG} from "solid-qr-code";
 import Peer from 'peerjs';
 import {Receiving} from './receiving';
 import {Show, createSignal} from 'solid-js';
@@ -35,11 +35,13 @@ function App() {
                     <h1>P2P File Sharing</h1>
                     <p>Identity: <strong>{peer.id}</strong></p>
                 </div>
-                <QRCodeCanvas
+                <QRCodeSVG
                     value={url}
                     level="high"
                     width={url.length * 2}
                     height={url.length * 2}
+                    backgroundColor="var(--bs-body-bg)"
+                    foregroundColor="var(--bs-body-color)"
                 />
             </div>
             <br />
