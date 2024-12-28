@@ -9,6 +9,16 @@ import {Receiving} from './receiving';
 import {Show, createSignal} from 'solid-js';
 import "./index.css";
 
+function setBootstrapTheme() {
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const doc = document.documentElement;
+
+    doc.setAttribute("data-bs-theme", query.matches ? "dark" : "light");
+    query.onchange = (ev) => {
+        doc.setAttribute("data-bs-theme", ev.matches ? "dark" : "light");
+    }
+}
+
 function App() {
     const [error, setError] = createSignal("");
     const peer = new Peer(`jmp2p_${v4().slice(0, 8)}`);
@@ -16,6 +26,7 @@ function App() {
         `${window.location.protocol}//${window.location.hostname}/?id=${peer.id}`
 
     peer.on("error", (err) => setError(err.message + " Try to refresh."));
+    setBootstrapTheme();
 
     return <div class="w-full h-dvh flex flex-col items-center justify-between">
         <div class="max-w-[800px] w-full p-4">
@@ -74,7 +85,6 @@ function App() {
         <div class="bottom-0 flex items-center hover:cursor-pointer mb-3"
             onClick={() => window.location.assign("https://johanmontorfano.com")}
         >
-            <p class="mr-2">by</p>
             <img alt="Author's logo"
                 src="https://johanmontorfano.com/assets/logo.svg" 
                 width={30} 
