@@ -1,81 +1,65 @@
-import Peer from "peerjs";
+import Peer, { DataConnection } from "peerjs";
 import { Button, Form } from "solid-bootstrap";
 import { Show, createSignal } from "solid-js";
-import { P2PDataset } from "./types";
+import { Metadata, P2PDataset } from "./types";
 import { getHash } from "./integrity";
+import { setProperty } from "solid-js/web";
 
 export function Receiving(props: { peer: Peer }) {
-    const urlParams = new URLSearchParams(document.location.search);
-    let fileParts: ArrayBuffer[] = [];
-    let readBytes = 0;
+    const url = new URLSearchParams(document.location.search);
+    const fileParts: ArrayBuffer[] = [];
 
-    const [broadcasterID, setBroadcasterID] = createSignal(
-        urlParams.has("id") ? urlParams.get("id") as string : ""
-    );
-    const [autoPopulatedID, setAutoPopulatedID] = createSignal(
-        urlParams.has("id")
-    );
-    const [broadcasterExists, setBroadcasterExists] = createSignal<
-        null | boolean
-    >(null);
-    const [contentType, setContentType] = createSignal("");
-    const [fileName, setFileName] = createSignal("");
-    const [fileSize, setFileSize] = createSignal(0);
-    const [broadcasterSupportIntegrity, setBSI] = createSignal(true);
-    const [progress, setProgress] = createSignal("0");
+    const [conn, setConn] = createSignal<DataConnection>();
+    const [bcasterID, setBcasterID] = createSignal("");
+    const [bcasterFound, setBcasterFound] = createSignal(false);
+    const [metadata, setMetadata] = createSignal<Metadata>({} as any);
+    const [readBytes, setReadBytes] = createSignal(0);
+    const [transferStarted, setTransferStatus] = createSignal(false);
+    const [progression, setProgression] = createSignal("0.00");
 
-    function checkPeer() {
-        const conn = props.peer.connect("jmp2p_" + broadcasterID());
-        setAutoPopulatedID(false);
-        conn.on("open", () => {
-            setBroadcasterExists(true);
-            fileParts = [];
-        });
-        conn.on("data", async (data) => {
-            const dataset = data as P2PDataset;
-            if (dataset.type === "metadata") {
-                const metadata = JSON.parse(dataset.raw);
-                setFileName(metadata.fileName);
-                setFileSize(metadata.fileSize);
-                setContentType(metadata.contentType);
-                setBSI(metadata.cryptoOk);
-                conn.send({
-                    type: "allow-download",
-                    raw: "1",
-                });
-            }
-            if (dataset.type === "data-chunk") {
-                const buf = dataset.raw as unknown as ArrayBuffer;
-               
-                if (broadcasterSupportIntegrity() && !dataset.sha) {
-                    setBroadcasterID("");
-                    setBroadcasterExists(null);
-                    conn.close();
-                    return;
+    if (url.has("id")) setBcasterID(url.get("id") as string);
+
+    function clearBroadcaster() {
+        setBcasterID("");
+        setBcasterFound(false);
+        setMetadata({} as any);
+        setReadBytes(0);
+        setTransferStatus(false);
+    }
+
+    function getBroadcaster() {
+        const conn = props.peer.connect("jmp2p_" + bcasterID());
+
+        setConn(conn);
+        conn.on("open", () => setBcasterFound(true));
+        conn.on("data", async (data: any) => {
+            if (data.type === "metadata") setMetadata(JSON.parse(data.raw));
+            if (data.type === "data-chunk") {
+                if (metadata().cryptoOk && !data.sha) {
+                    clearBroadcaster();
+                    return conn.close();
                 }
-                if (broadcasterSupportIntegrity() && dataset.sha) {
-                    const bufSha = await getHash(buf);
-
-                    if (bufSha !== dataset.sha) {
-                        setBroadcasterID("");
-                        setBroadcasterExists(null);
-                        conn.close();
-                        return;
+                if (metadata().cryptoOk && data.sha) {
+                    if (await getHash(data.raw) !== data.sha) {
+                        clearBroadcaster();
+                        return conn.close();
                     }
                 }
-
-                readBytes += buf.byteLength / 8;
-                fileParts.push(buf);
-                setProgress((readBytes / fileSize() * 100).toFixed(2));
+                setReadBytes(p => p + data.raw.byteLength / 8);
+                setProgression(
+                    (readBytes() / metadata().fileSize * 100).toFixed(2));
+                fileParts.push(data.raw);
             }
-            if (dataset.type === "finished") {
-                const file = new Blob(fileParts, {type: contentType()});
+            if (data.type === "finished") {
+                const file = new Blob(fileParts, {
+                    type: metadata().contentType
+                });
                 const downloader = document.createElement("a");
+
                 downloader.href = URL.createObjectURL(file);
-                downloader.download = fileName();
+                downloader.download = metadata().fileName as string;
                 downloader.click();
-                setBroadcasterID("");
-                setBroadcasterExists(null);
+                clearBroadcaster();
                 conn.close();
             }
         });
@@ -84,57 +68,61 @@ export function Receiving(props: { peer: Peer }) {
     return (
         <div>
             <Form
+                class="flex items-end"
                 onSubmit={(ev) => {
+                    const id = document.getElementById("broadcaster-id");
+                
+                    setBcasterID((id as any).value);
+                    getBroadcaster();
                     ev.preventDefault();
-                    const broadcasterInput =
-                        document.getElementById("broadcaster-id");
-                    if (broadcasterInput) {
-                        setBroadcasterID((broadcasterInput as any).value);
-                        checkPeer();
-                    }
                 }}
             >
-                <Form.Group>
+                <Form.Group class="flex-1">
                     <Form.Label>Broadcaster identifier</Form.Label>
                     <Form.Control
                         type="text"
                         id="broadcaster-id"
-                        value={broadcasterID()}
-                        disabled={broadcasterID() !== "" || autoPopulatedID()}
+                        value={bcasterID()}
+                        disabled={bcasterID() !== ""}
+                        placeholder="Enter the broadcaster identifier here..."
                         required
                     />
                 </Form.Group>
-                <br />
                 <Button
-                    disabled={broadcasterID() !== "" && !autoPopulatedID()}
+                    disabled={bcasterID() !== ""}
                     variant="primary"
-                    class="text-white"
+                    class="text-white ml-2"
                     type="submit"
                 >
-                    Start receiving
+                    Connect
                 </Button>
             </Form>
+            <Show when={bcasterFound()}>
+                <br />
+                <p>Broadcaster exists: {bcasterFound() + ""}</p>
+                <p>Integrity checks: {metadata().cryptoOk + ""}</p>
+            </Show>
+            <Show when={bcasterID() !== ""}>
+                <br />
+                <Form onSubmit={(ev) => {
+                    conn()?.send({type: "allow-download"});
+                     setTransferStatus(true);
+                    ev.preventDefault();
+                }}>
+                    <Button
+                        variant="primary"
+                        class="text-white"
+                        type="submit"
+                    >
+                        Transfer
+                    </Button>
+                </Form>
+            </Show>
             <br />
-            <Show when={broadcasterID() !== "" && !autoPopulatedID()}>
-                <Show
-                    when={broadcasterExists() !== null}
-                    fallback={<p>Looking for {broadcasterID()}...</p>}
-                >
-                    <p>
-                        Broadcaster exists: {broadcasterExists() ? "yes" : "no"}
-                    </p>
-                    <p>
-                        Broadcaster has integrity checks: 
-                            {broadcasterSupportIntegrity() ? "yes": "no"}
-                    </p>
-                </Show>
-                <Show when={fileName() !== ""}>
-                    <p>Transferring {fileName()}</p>
-                    <p>File weights {fileSize()} bytes</p>
-                </Show>
-                <Show when={broadcasterExists()}>
-                    <p>Transferring... ({progress()}%)</p>
-                </Show>
+            <Show when={transferStarted()}>
+                <p>Transferring {metadata().fileName}</p>
+                <p>File weights {metadata().fileSize} bytes</p>
+                <p>Loaded {progression()}%</p>
             </Show>
         </div>
     );
