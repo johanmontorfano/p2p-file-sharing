@@ -7,10 +7,7 @@ import { getHash, supportIntegrity } from "./integrity";
 /** The size of a chunk of the broadcasted file 64ko. */
 const FILE_CHUNK_SIZE = 65536;
 
-/**
- * This is the UI used to initiate and monitor files shared.
- * @param peer The Peer instance of the broadcaster.
- */
+/** This is the UI used to initiate and monitor files shared. */
 export function Broadcasting(props: { peer: Peer }) {
     const [broadcastingReady, setBroadcastingReady] = createSignal(false);
     const [peerConnected, setPeerConnected] = createSignal("");

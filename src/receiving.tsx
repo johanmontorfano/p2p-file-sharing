@@ -25,7 +25,7 @@ export function Receiving(props: { peer: Peer }) {
     const [progress, setProgress] = createSignal("0");
 
     function checkPeer() {
-        const conn = props.peer.connect(broadcasterID());
+        const conn = props.peer.connect("jmp2p_" + broadcasterID());
         setAutoPopulatedID(false);
         conn.on("open", () => {
             setBroadcasterExists(true);

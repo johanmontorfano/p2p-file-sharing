@@ -1,14 +1,14 @@
 /* @refresh reload */
+import Peer from 'peerjs';
 import { Accordion, Card } from 'solid-bootstrap';
 import { render } from 'solid-js/web';
-import { v4 } from "uuid";
-import {Broadcasting} from './broadcasting';
-import {QRCodeSVG} from "solid-qr-code";
-import Peer from 'peerjs';
-import {Receiving} from './receiving';
-import {Show, createSignal} from 'solid-js';
-import "./index.css";
+import { Broadcasting } from './broadcasting';
+import { QRCodeSVG } from "solid-qr-code";
+import { Receiving } from './receiving';
+import { Show, createSignal } from 'solid-js';
 import { supportIntegrity } from './integrity';
+import "./index.css";
+import { getRandomName } from './random_name';
 
 function setBootstrapTheme() {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
@@ -21,8 +21,9 @@ function setBootstrapTheme() {
 }
 
 function App() {
+    const name = getRandomName();
     const [error, setError] = createSignal("");
-    const peer = new Peer(`jmp2p_${v4().slice(0, 8)}`);
+    const peer = new Peer(`jmp2p_${name}`);
     const url = 
         `${window.location.protocol}//${window.location.hostname}/?id=${peer.id}`
 
@@ -34,7 +35,7 @@ function App() {
             <div class="w-full flex justify-between items-center">
                 <div>
                     <h1>P2P File Sharing</h1>
-                    <p>Identity: <strong>{peer.id}</strong></p>
+                    <p>Identity: <strong>{name}</strong></p>
                 </div>
                 <QRCodeSVG
                     value={url}
