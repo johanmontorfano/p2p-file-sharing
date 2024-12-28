@@ -2,10 +2,9 @@ import { Button, Form, Spinner } from "solid-bootstrap";
 import { Show, createSignal } from "solid-js";
 import { Peer } from "peerjs";
 import { P2PDataset } from "./types";
+import { getHash, supportIntegrity } from "./integrity";
 
-/**
- * The size of a chunk of the broadcasted file 64ko.
- */
+/** The size of a chunk of the broadcasted file 64ko. */
 const FILE_CHUNK_SIZE = 65536;
 
 /**
@@ -20,7 +19,7 @@ export function Broadcasting(props: { peer: Peer }) {
     return (
         <div>
             <Form
-                onSubmit={(ev) => {
+                onSubmit={async (ev) => {
                     ev.preventDefault();
                     const fileInput = document.getElementById(
                         "file-input",
@@ -32,6 +31,7 @@ export function Broadcasting(props: { peer: Peer }) {
                         fileInput.files.length > 0
                     ) {
                         const file = fileInput.files.item(0) as File;
+
                         setBroadcastingReady(true);
                         props.peer.on("connection", (conn) => {
                             conn.on("open", () => {
@@ -41,7 +41,8 @@ export function Broadcasting(props: { peer: Peer }) {
                                     raw: JSON.stringify({
                                         fileName: file.name,
                                         fileSize: file.size,
-                                        contentType: file.type
+                                        contentType: file.type,
+                                        cryptoOk: supportIntegrity()
                                     }),
                                 });
                             });
@@ -54,9 +55,13 @@ export function Broadcasting(props: { peer: Peer }) {
                                             startByte,
                                             startByte + FILE_CHUNK_SIZE
                                         );
+                                        const buf = await slice.arrayBuffer();
+                                        const sliceSha = await getHash(buf);
+
                                         conn.send({
                                             type: "data-chunk",
-                                            raw: await slice.arrayBuffer()
+                                            raw: await slice.arrayBuffer(),
+                                            sha: sliceSha + "1"
                                         });
                                         startByte += FILE_CHUNK_SIZE;
                                         setProgress(startByte / file.size > 1 ?

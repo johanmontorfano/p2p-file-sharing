@@ -8,6 +8,7 @@ import Peer from 'peerjs';
 import {Receiving} from './receiving';
 import {Show, createSignal} from 'solid-js';
 import "./index.css";
+import { supportIntegrity } from './integrity';
 
 function setBootstrapTheme() {
     const query = window.matchMedia("(prefers-color-scheme: dark)");
@@ -52,6 +53,21 @@ function App() {
                     </Card.Header>
                     <Card.Body>
                         <Card.Text>{error()}</Card.Text>
+                    </Card.Body>
+                </Card>
+            </Show>
+            <Show when={!supportIntegrity()}>
+                <Card bg="info" text="white">
+                    <Card.Header>
+                        Security Concerns
+                    </Card.Header>
+                    <Card.Body>
+                        <Card.Text>
+                            Your browser doesn't support a module needed to
+                            operate integrity checks over the files you send.
+                            You can still use the service but no checks will
+                            be made on you side or on the client's side.
+                        </Card.Text>
                     </Card.Body>
                 </Card>
             </Show>

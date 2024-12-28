@@ -2,4 +2,5 @@
 export interface P2PDataset {
     type: "data-chunk" | "metadata" | "allow-download" | "finished";
     raw: string;
+    sha?: string;
 }

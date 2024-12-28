@@ -1,7 +1,8 @@
 import Peer from "peerjs";
 import { Button, Form } from "solid-bootstrap";
-import { Show, createEffect, createSignal } from "solid-js";
+import { Show, createSignal } from "solid-js";
 import { P2PDataset } from "./types";
+import { getHash } from "./integrity";
 
 export function Receiving(props: { peer: Peer }) {
     const urlParams = new URLSearchParams(document.location.search);
@@ -20,7 +21,8 @@ export function Receiving(props: { peer: Peer }) {
     const [contentType, setContentType] = createSignal("");
     const [fileName, setFileName] = createSignal("");
     const [fileSize, setFileSize] = createSignal(0);
-    const [progress, setProgress] = createSignal(0);
+    const [broadcasterSupportIntegrity, setBSI] = createSignal(true);
+    const [progress, setProgress] = createSignal("0");
 
     function checkPeer() {
         const conn = props.peer.connect(broadcasterID());
@@ -29,13 +31,14 @@ export function Receiving(props: { peer: Peer }) {
             setBroadcasterExists(true);
             fileParts = [];
         });
-        conn.on("data", (data) => {
+        conn.on("data", async (data) => {
             const dataset = data as P2PDataset;
             if (dataset.type === "metadata") {
                 const metadata = JSON.parse(dataset.raw);
                 setFileName(metadata.fileName);
                 setFileSize(metadata.fileSize);
                 setContentType(metadata.contentType);
+                setBSI(metadata.cryptoOk);
                 conn.send({
                     type: "allow-download",
                     raw: "1",
@@ -43,9 +46,27 @@ export function Receiving(props: { peer: Peer }) {
             }
             if (dataset.type === "data-chunk") {
                 const buf = dataset.raw as unknown as ArrayBuffer;
+               
+                if (broadcasterSupportIntegrity() && !dataset.sha) {
+                    setBroadcasterID("");
+                    setBroadcasterExists(null);
+                    conn.close();
+                    return;
+                }
+                if (broadcasterSupportIntegrity() && dataset.sha) {
+                    const bufSha = await getHash(buf);
+
+                    if (bufSha !== dataset.sha) {
+                        setBroadcasterID("");
+                        setBroadcasterExists(null);
+                        conn.close();
+                        return;
+                    }
+                }
+
                 readBytes += buf.byteLength / 8;
                 fileParts.push(buf);
-                setProgress(readBytes / fileSize() * 100);
+                setProgress((readBytes / fileSize() * 100).toFixed(2));
             }
             if (dataset.type === "finished") {
                 const file = new Blob(fileParts, {type: contentType()});
@@ -99,7 +120,13 @@ export function Receiving(props: { peer: Peer }) {
                     when={broadcasterExists() !== null}
                     fallback={<p>Looking for {broadcasterID()}...</p>}
                 >
-                    <p>Broadcaster exists: {broadcasterExists() ? "yes" : "no"}</p>
+                    <p>
+                        Broadcaster exists: {broadcasterExists() ? "yes" : "no"}
+                    </p>
+                    <p>
+                        Broadcaster has integrity checks: 
+                            {broadcasterSupportIntegrity() ? "yes": "no"}
+                    </p>
                 </Show>
                 <Show when={fileName() !== ""}>
                     <p>Transferring {fileName()}</p>
